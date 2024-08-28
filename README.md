@@ -1,7 +1,7 @@
 # Instalacion de dependencias
 
-chmod +x install_dependencies.sh
+chmod +x setup_and_run.sh
 
-./install_dependencies.sh
+./setup_and_run.sh
 
 
