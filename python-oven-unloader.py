@@ -269,7 +269,7 @@ def moveOnePosition():
 		else:
 			return
 			
-	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB)
+	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 	cur = db.cursor()
 	qry = """UPDATE Configuration SET currentPosition = """  + str(currentPosition) + """ WHERE ID = 1"""
 	cur.execute(qry)
@@ -304,7 +304,7 @@ def readConfParam():
 	global tempMin
 	global tempsMinimVentilador
 
-	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB)
+	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 	print('Connected to MySQL')
 	cur = db.cursor()
 	cur.execute("SELECT * FROM Configuration WHERE ID = 1")
@@ -362,7 +362,7 @@ def generateAlarm():
 	else:
 		client.publish('CTForn/IM_ALMOST_FULL','IM ALMOST FULL')
 	
-	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDBAlarm)
+	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 	print('Connected to MySQL')
 	cur = db.cursor()
 	cur.execute("SELECT * FROM WARNING WHERE IP = '" + str(machineIP) + "'" )
@@ -378,7 +378,7 @@ def generateAlarm():
 
 def deleteAlarm():
 	
-	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDBAlarm)
+	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 	print('Connected to MySQL')
 	cur = db.cursor()
 	cur.execute("DELETE FROM WARNING WHERE IP = '" + str(machineIP) + "'" )
@@ -390,7 +390,7 @@ def deleteAlarm():
 
 def addPlateDone():
 	
-	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB)
+	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 	cur = db.cursor()
 	qry = """UPDATE Configuration SET plaquesTotalsFetes = plaquesTotalsFetes + 1 WHERE ID = 1"""
 	cur.execute(qry)
@@ -479,7 +479,7 @@ def on_message(client, userdata, message):
 				elif direction == Adalt:
 					currentPosition = currentPosition+1
 
-				db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB)
+				db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 				cur = db.cursor()
 				qry = """UPDATE Configuration SET currentPosition = """  + str(currentPosition) + """ WHERE ID = 1"""
 				cur.execute(qry)
@@ -766,7 +766,7 @@ if __name__ == '__main__':
 
 			goToYourPosition()
 
-			db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB)
+			db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 			cur = db.cursor()
 			qry = "UPDATE Configuration SET autoDirection = "  + str(autoDirection) + " WHERE ID = 1"
 			cur.execute(qry)
