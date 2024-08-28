@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 import MySQLdb
 import socket
+import threading
 
 Connected 					= False
 broker_address 				= '192.168.1.100'
@@ -116,50 +117,58 @@ estatVentiladorON			= 1
 estatVentiladorOFF			= 0
 estatVentilador 			=estatVentiladorOFF
 
-def lowerMicro_event(channel):
+def check_lowerMicro_event():
 	global estatElevador 
-	if gpio.input(lowerMicroPin):      
+	if gpio.input(lowerMicroPin) and estatElevador != estatElevadorIndeterminat:      
 		print ("Lower micro RELEASED")
-		estatElevador = estatElevadorIndeterminat		
-	else: 
+		estatElevador = estatElevadorIndeterminat	
+		client.publish('CTForn/estatElevador',estatElevador)	
+	elif not gpio.input(lowerMicroPin) and estatElevador != estatElevadorAbaix: 
 		print ("Lower micro PRESS")
 		estatElevador = estatElevadorAbaix
-	client.publish('CTForn/estatElevador',estatElevador)
+		client.publish('CTForn/estatElevador',estatElevador)
 	
-def upperMicro_event(channel):
+def check_upperMicro_event():
 	global estatElevador 
-	if gpio.input(upperMicroPin):      
+	if gpio.input(upperMicroPin) and estatElevador != estatElevadorIndeterminat:      
 		print ("Upper micro RELEASED")
-		estatElevador = estatElevadorIndeterminat		
-	else: 
+		estatElevador = estatElevadorIndeterminat
+		client.publish('CTForn/estatElevador',estatElevador)
+	elif not gpio.input(upperMicroPin) and estatElevador != estatElevadorAdalt: 
 		print ("Upper micro PRESS")
 		estatElevador = estatElevadorAdalt
-	client.publish('CTForn/estatElevador',estatElevador)
+		client.publish('CTForn/estatElevador',estatElevador)
 
-def sensorIN_event(channel):
-	global estatPlaca 
-	global horaPlacaForaDeSensor
-	global needToMoveOnePosition
-	# ~ print ("Event, gpio state: " + str(gpio.input(sensorINPin)) + " estat placa: " + str(estatPlaca))
-	if gpio.input(sensorINPin) and estatPlaca == estatPlacaEntrant and needToMoveOnePosition == False:
-		time.sleep(0.1)
-		if not gpio.input(sensorINPin):
-			return
-		estatPlaca = estatPlacaDins   		
-		print ("Placa dins del sistema")
-		client.publish('CTForn/estatPlate',estatPlaca)
-		needToMoveOnePosition = True
-		horaPlacaForaDeSensor = datetime.now()
-	elif not gpio.input(sensorINPin) and estatPlaca != estatPlacaEntrant and needToMoveOnePosition == False:
-		time.sleep(0.1)
-		if gpio.input(sensorINPin):
-			return
-		estatPlaca = estatPlacaEntrant
-		print ("Placa entrant al sistema")
-		client.publish('CTForn/estatPlate',estatPlaca)
-	gpio.remove_event_detect(sensorINPin)
-	time.sleep(0.1)
-	gpio.add_event_detect(sensorINPin, gpio.BOTH, callback=sensorIN_event,bouncetime=10)
+def monitor_events():
+    while True:
+        check_lowerMicro_event()
+        check_upperMicro_event()
+        time.sleep(0.3)  # Wait for 0.3 seconds
+
+#def sensorIN_event(channel):
+#	global estatPlaca 
+#	global horaPlacaForaDeSensor
+#	global needToMoveOnePosition
+#	# ~ print ("Event, gpio state: " + str(gpio.input(sensorINPin)) + " estat placa: " + str(estatPlaca))
+#	if gpio.input(sensorINPin) and estatPlaca == estatPlacaEntrant and needToMoveOnePosition == False:
+#		time.sleep(0.1)
+#		if not gpio.input(sensorINPin):
+#			return
+#		estatPlaca = estatPlacaDins   		
+#		print ("Placa dins del sistema")
+#		client.publish('CTForn/estatPlate',estatPlaca)
+#		needToMoveOnePosition = True
+#		horaPlacaForaDeSensor = datetime.now()
+#	elif not gpio.input(sensorINPin) and estatPlaca != estatPlacaEntrant and needToMoveOnePosition == False:
+#		time.sleep(0.1)
+#		if gpio.input(sensorINPin):
+#			return
+#		estatPlaca = estatPlacaEntrant
+#		print ("Placa entrant al sistema")
+#		client.publish('CTForn/estatPlate',estatPlaca)
+#	gpio.remove_event_detect(sensorINPin)
+#	time.sleep(0.1)
+#	gpio.add_event_detect(sensorINPin, gpio.BOTH, callback=sensorIN_event,bouncetime=10)
 		
 
 def enableDriver(Direcction):
@@ -572,9 +581,9 @@ if __name__ == '__main__':
 	gpio.output(SMEMAPin, True)
 	gpio.setup(ventiladorPin, gpio.OUT)
 	gpio.output(ventiladorPin, False)
-	gpio.add_event_detect(lowerMicroPin, gpio.BOTH, callback=lowerMicro_event)
+	#gpio.add_event_detect(lowerMicroPin, gpio.BOTH, callback=lowerMicro_event)
 	gpio.setup(upperMicroPin, gpio.IN)
-	gpio.add_event_detect(upperMicroPin, gpio.BOTH, callback=upperMicro_event)
+	#gpio.add_event_detect(upperMicroPin, gpio.BOTH, callback=upperMicro_event)
 	gpio.setup(sensorINPin, gpio.IN, pull_up_down=gpio.PUD_UP)
 	gpio.setup(rackINPin, gpio.IN, pull_up_down=gpio.PUD_UP)
 	# ~ gpio.add_event_detect(sensorINPin, gpio.BOTH, callback=sensorIN_event,bouncetime=10)
@@ -625,6 +634,10 @@ if __name__ == '__main__':
 	cur.close()
 	db.close ()
 	
+	# Start the monitoring thread
+	event_thread = threading.Thread(target=monitor_events)
+	event_thread.start()
+
 	readConfParam()
 	goToYourNearestHomeYouAreDrunk()
 	goToYourPosition()
