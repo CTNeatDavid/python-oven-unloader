@@ -629,8 +629,8 @@ if __name__ == '__main__':
 	db.close ()
 	
 	# Start the monitoring thread
-	event_thread = threading.Thread(target=monitor_events)
-	event_thread.start()
+	#event_thread = threading.Thread(target=monitor_events)
+	#event_thread.start()
 
 	readConfParam()
 	goToYourNearestHomeYouAreDrunk()
