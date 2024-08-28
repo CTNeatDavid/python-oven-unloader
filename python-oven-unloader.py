@@ -567,7 +567,7 @@ if __name__ == '__main__':
 	gpio.output(SMEMAPin, True)
 	gpio.setup(ventiladorPin, gpio.OUT)
 	gpio.output(ventiladorPin, False)
-	gpio.add_event_detect(lowerMicroPin, gpio.BOTH, callback=lowerMicro_event)
+	#gpio.add_event_detect(lowerMicroPin, gpio.BOTH, callback=lowerMicro_event)
 	gpio.setup(upperMicroPin, gpio.IN)
 	gpio.add_event_detect(upperMicroPin, gpio.BOTH, callback=upperMicro_event)
 	gpio.setup(sensorINPin, gpio.IN, pull_up_down=gpio.PUD_UP)
