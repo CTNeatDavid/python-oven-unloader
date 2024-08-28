@@ -134,8 +134,8 @@ def check_lowerAndUpperMicro_event():
 			print ("Lower micro RELEASED")
 		else:
 			print ("Upper micro RELEASED")
-	estatElevador = estatElevadorIndeterminat	
-	client.publish('CTForn/estatElevador',estatElevador)
+		estatElevador = estatElevadorIndeterminat	
+		client.publish('CTForn/estatElevador',estatElevador)
 
 def monitor_events():
     while True:
