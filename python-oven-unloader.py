@@ -19,7 +19,7 @@ mysqlDB						= 'CTForn'
 mysqlDBAlarm				= 'ProcessControl'
 mysqlUser					= 'root'
 mysqlPass					= 'ZpZCn*uFoZ.oMbk_xmY3'
-mysqlPort					= '3307'
+mysqlPort					= 3307
 
 machineName					= ""
 machineIP					= ""
