@@ -204,7 +204,6 @@ def sendPulse(pulses, timeBaix, timeAlt):
 		usleep(timeBaix)
 		gpio.output(pulsePin, valorAlt)
 		usleep(timeAlt)
-	client.publish('CTForn/movingElevator',direccioIndeterminada)
 	return
 
 	
@@ -231,10 +230,12 @@ def goToYourPosition():
 		changeDirection(Abaix)
 		pulsosToSend = round(pulsosLastPosition + (numeroDePosicion-currentPosition)*pulsosPerPis)
 		sendPulse(pulsosToSend,velocitatOFF,velocitatON)
+		client.publish('CTForn/movingElevator',direccioIndeterminada)
 	elif referencePos == lowerReference:
 		changeDirection(Adalt)
 		pulsosToSend = round(pulsosFirstPos + currentPosition*pulsosPerPis)
 		sendPulse(pulsosToSend,velocitatOFF,velocitatON)
+		client.publish('CTForn/movingElevator',direccioIndeterminada)
 	print('Current position reached!')
 		
 def goToYourNearestHomeYouAreDrunk():
@@ -250,14 +251,18 @@ def goToYourNearestHomeYouAreDrunk():
 		print('Lower home reached!')
 
 def moveToUpperHome():
+	print('Going up')
 	changeDirection(Adalt)
 	while estatElevador != estatElevadorAdalt:		
 		sendPulse(pulsosPerRev,velocitatOFF,velocitatON)
+	client.publish('CTForn/movingElevator',direccioIndeterminada)
 
 def moveToLowerHome():
+	print('Going down')
 	changeDirection(Abaix)
 	while estatElevador != estatElevadorAbaix:		
 		sendPulse(pulsosPerRev,velocitatOFF,velocitatON)
+	client.publish('CTForn/movingElevator',direccioIndeterminada)
 
 def moveOnePosition():
 	global currentPosition
@@ -286,6 +291,7 @@ def moveOnePosition():
 	print('Current position: ' + str(currentPosition))
 	changeDirection(autoDirection)
 	sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
+	client.publish('CTForn/movingElevator',direccioIndeterminada)
 
 def readConfParam():
 
@@ -430,6 +436,7 @@ def on_message(client, userdata, message):
 				print('SpeedOFF: ' + str(speedOFF))
 				changeDirection(int(direction))
 				sendPulse(int(numberOfPulses),float(speedOFF),float(speedON))
+				client.publish('CTForn/movingElevator',direccioIndeterminada)
 				client.publish('CTForn/SendPulses/' + randomUIdClient,'DONE')
 		elif message.topic == 'CTForn/TurnMotor': #Turns%direction@speedON|speedOFF
 			turns = 0
@@ -475,6 +482,7 @@ def on_message(client, userdata, message):
 				print('Current position: ' + str(currentPosition))
 				changeDirection(direction)				
 				sendPulse(round(pulsosPerPis),float(speedOFF),float(speedON))
+				client.publish('CTForn/movingElevator',direccioIndeterminada)
 				# ~ time.sleep(0.01)
 				client.publish('CTForn/TurnMotor/' + randomUIdClient,'DONE')
 		elif message.topic == 'CTForn/currentElevatorState':
