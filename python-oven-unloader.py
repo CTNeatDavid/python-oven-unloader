@@ -19,6 +19,7 @@ mysqlDB						= 'CTForn'
 mysqlDBAlarm				= 'ProcessControl'
 mysqlUser					= 'root'
 mysqlPass					= 'ZpZCn*uFoZ.oMbk_xmY3'
+mysqlPort					= '3307'
 
 machineName					= ""
 machineIP					= ""
@@ -615,7 +616,7 @@ if __name__ == '__main__':
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB)
+	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 	cur = db.cursor()
 	cur.execute("UPDATE Configuration SET iniciPrograma = '" + timestamp + "' WHERE ID = 1")
 	db.commit()
