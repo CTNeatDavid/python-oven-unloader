@@ -9,14 +9,14 @@ import MySQLdb
 import socket
 
 Connected 					= False
-broker_address 				= 'localhost'
+broker_address 				= '192.168.1.100'
 port 						= 1883
 
-mysqlHost 					= '192.168.0.151'
+mysqlHost 					= '192.168.1.100'
 mysqlDB						= 'CTForn'
 mysqlDBAlarm				= 'ProcessControl'
 mysqlUser					= 'root'
-mysqlPass					= 'Ct-937153808'
+mysqlPass					= 'ZpZCn*uFoZ.oMbk_xmY3'
 
 machineName					= ""
 machineIP					= ""
@@ -325,11 +325,7 @@ def readConfParam():
 	tempMax = int(configurationRecord[14])
 	tempMin = int(configurationRecord[15])
 	tempsMinimVentilador = int(configurationRecord[16])
-
-	cur.execute("SELECT * FROM Programes WHERE ID = " + str(currentConf) )
-	programesRecord = cur.fetchone()
-	plaquesMarge = programesRecord[3]
-	programaSel = programesRecord[1]
+	plaquesMarge = int(configurationRecord[28])
 
 	cur.close()
 	# close the connection
@@ -355,7 +351,7 @@ def readConfParam():
 	print('Temp. maxima: ' + str(tempMax))
 	print('Temp. minima: ' + str(tempMin))
 	print('Temps minim ventilador: ' + str(tempsMinimVentilador))
-	print('Programa seleccionat: ' + programaSel + ' plaques de marge: ' + str(plaquesMarge))
+	print('Plaques de marge: ' + str(plaquesMarge))
 
 def generateAlarm():
 	if estatCarregador == estatCarregadorPle:
