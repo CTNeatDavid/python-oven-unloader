@@ -367,31 +367,10 @@ def generateAlarm():
 		client.publish('CTForn/IM_FULL','IM FULL')
 	else:
 		client.publish('CTForn/IM_ALMOST_FULL','IM ALMOST FULL')
-	
-	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
-	print('Connected to MySQL')
-	cur = db.cursor()
-	cur.execute("SELECT * FROM WARNING WHERE IP = '" + str(machineIP) + "'" )
-	if cur.rowcount > 0:
-		print('Warning already created')
-		return
-	cur.execute("INSERT INTO WARNING (RASPBERRY_ID,IP,Descripcio) VALUES ('" + machineName + "', '" + machineIP + "', '" + warningDescription + "')")
-	db.commit()
-	cur.close()
-	# close the connection
-	db.close ()
 	print('Warning created')
 
 def deleteAlarm():
 	
-	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
-	print('Connected to MySQL')
-	cur = db.cursor()
-	cur.execute("DELETE FROM WARNING WHERE IP = '" + str(machineIP) + "'" )
-	db.commit()
-	cur.close()
-	# close the connection
-	db.close ()
 	print('Possible warning deleted')
 
 def addPlateDone():
