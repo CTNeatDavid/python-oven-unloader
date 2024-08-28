@@ -11,6 +11,8 @@ import socket
 Connected 					= False
 broker_address 				= '192.168.1.100'
 port 						= 1883
+mqttPass					= 'FGGaLHjaPygGLVBmNt4qcN4aRqyYkz'
+mqttUser					= 'CTPROD'
 
 mysqlHost 					= '192.168.1.100'
 mysqlDB						= 'CTForn'
@@ -539,8 +541,10 @@ def on_message(client, userdata, message):
 	    print('Exception message: ' + str(e))       
 
 client = mqttClient.Client('Python')               	#create new instance
+client.username_pw_set(mqttUser, mqttPass)
 client.on_connect = on_connect                      #attach function to callback
 client.on_message = on_message
+
 
 
 if __name__ == '__main__':
