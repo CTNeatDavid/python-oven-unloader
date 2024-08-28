@@ -24,7 +24,6 @@ mysqlPort					= 3307
 
 machineName					= ""
 machineIP					= ""
-warningDescription			= "Descarregador del forn ple"
 
 enablePin 					= 16
 dirPin 						= 20
@@ -94,6 +93,7 @@ resetRequested 				= False
 upperResetRequested			= False
 lowerResetRequested			= False
 autoMode					= True
+stopMovement				= False
 
 estatRackIN					= 1
 estatRackOUT				= 0
@@ -198,14 +198,19 @@ def sendPulse(pulses, timeBaix, timeAlt):
 	sent = 0
 	usleep = lambda x: time.sleep(x/1000000.0)
 	client.publish('CTForn/movingElevator',currentDirection)
-	while sent<pulses and ((estatElevador == estatElevadorAdalt and currentDirection == Abaix) or (estatElevador == estatElevadorAbaix and currentDirection == Adalt) or (estatElevador == estatElevadorIndeterminat)):
+	while sent<pulses and stopMovement == False and ((estatElevador == estatElevadorAdalt and currentDirection == Abaix) or (estatElevador == estatElevadorAbaix and currentDirection == Adalt) or (estatElevador == estatElevadorIndeterminat)):
 		sent=sent+1
 		gpio.output(pulsePin, valorBaix)
 		usleep(timeBaix)
 		gpio.output(pulsePin, valorAlt)
 		usleep(timeAlt)
+	#if stopMovement == True:
 	return
 
+def movementStopped():
+	global stopMovement
+	stopMovement = False
+	client.publish('CTForn/movingElevator',direccioIndeterminada)
 	
 def changeDirection(newDir):
 
@@ -230,12 +235,12 @@ def goToYourPosition():
 		changeDirection(Abaix)
 		pulsosToSend = round(pulsosLastPosition + (numeroDePosicion-currentPosition)*pulsosPerPis)
 		sendPulse(pulsosToSend,velocitatOFF,velocitatON)
-		client.publish('CTForn/movingElevator',direccioIndeterminada)
+		movementStopped()
 	elif referencePos == lowerReference:
 		changeDirection(Adalt)
 		pulsosToSend = round(pulsosFirstPos + currentPosition*pulsosPerPis)
 		sendPulse(pulsosToSend,velocitatOFF,velocitatON)
-		client.publish('CTForn/movingElevator',direccioIndeterminada)
+		movementStopped()
 	print('Current position reached!')
 		
 def goToYourNearestHomeYouAreDrunk():
@@ -253,16 +258,16 @@ def goToYourNearestHomeYouAreDrunk():
 def moveToUpperHome():
 	print('Going up')
 	changeDirection(Adalt)
-	while estatElevador != estatElevadorAdalt:		
+	while estatElevador != estatElevadorAdalt and stopMovement == False:		
 		sendPulse(pulsosPerRev,velocitatOFF,velocitatON)
-	client.publish('CTForn/movingElevator',direccioIndeterminada)
+	movementStopped()
 
 def moveToLowerHome():
 	print('Going down')
 	changeDirection(Abaix)
-	while estatElevador != estatElevadorAbaix:		
+	while estatElevador != estatElevadorAbaix and stopMovement == False:		
 		sendPulse(pulsosPerRev,velocitatOFF,velocitatON)
-	client.publish('CTForn/movingElevator',direccioIndeterminada)
+	movementStopped()
 
 def moveOnePosition():
 	global currentPosition
@@ -291,7 +296,7 @@ def moveOnePosition():
 	print('Current position: ' + str(currentPosition))
 	changeDirection(autoDirection)
 	sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
-	client.publish('CTForn/movingElevator',direccioIndeterminada)
+	movementStopped()
 
 def readConfParam():
 
@@ -404,6 +409,7 @@ def on_message(client, userdata, message):
 	global currentPosition
 	global upperResetRequested
 	global lowerResetRequested
+	global stopMovement
 	try:
 		message.payload = message.payload.decode("utf-8")
 		print( 'Message received: ' + message.payload + ' of the topic ' + message.topic)
@@ -436,7 +442,7 @@ def on_message(client, userdata, message):
 				print('SpeedOFF: ' + str(speedOFF))
 				changeDirection(int(direction))
 				sendPulse(int(numberOfPulses),float(speedOFF),float(speedON))
-				client.publish('CTForn/movingElevator',direccioIndeterminada)
+				movementStopped()
 				client.publish('CTForn/SendPulses/' + randomUIdClient,'DONE')
 		elif message.topic == 'CTForn/TurnMotor': #Turns%direction@speedON|speedOFF
 			turns = 0
@@ -482,7 +488,7 @@ def on_message(client, userdata, message):
 				print('Current position: ' + str(currentPosition))
 				changeDirection(direction)				
 				sendPulse(round(pulsosPerPis),float(speedOFF),float(speedON))
-				client.publish('CTForn/movingElevator',direccioIndeterminada)
+				movementStopped()
 				# ~ time.sleep(0.01)
 				client.publish('CTForn/TurnMotor/' + randomUIdClient,'DONE')
 		elif message.topic == 'CTForn/currentElevatorState':
@@ -530,6 +536,9 @@ def on_message(client, userdata, message):
 			readConfParam()
 			goToYourNearestHomeYouAreDrunk()
 			goToYourPosition()
+		elif message.topic == 'CTForn/stopMovement':
+			print('Request to stop the movement')
+			stopMovement = True
 		return
 	except Exception as e:
 	    print('Exception message: ' + str(e))       
@@ -606,6 +615,7 @@ if __name__ == '__main__':
 	client.subscribe('CTForn/LowerReset')
 	client.subscribe('CTForn/UpdateFromMySQL')
 	client.subscribe('CTForn/currentMode')
+	client.subscribe('CTForn/stopMovement')
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -733,7 +743,6 @@ if __name__ == '__main__':
 
 
 			deleteAlarm()
-
 
 			if resetRequested:
 				goToYourNearestHomeYouAreDrunk()
