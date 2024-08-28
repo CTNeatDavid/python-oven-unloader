@@ -117,32 +117,29 @@ estatVentiladorON			= 1
 estatVentiladorOFF			= 0
 estatVentilador 			=estatVentiladorOFF
 
-def check_lowerMicro_event():
+def check_lowerAndUpperMicro_event():
 	global estatElevador 
-	if gpio.input(lowerMicroPin) and estatElevador != estatElevadorIndeterminat:      
-		print ("Lower micro RELEASED")
-		estatElevador = estatElevadorIndeterminat	
-		client.publish('CTForn/estatElevador',estatElevador)	
-	elif not gpio.input(lowerMicroPin) and estatElevador != estatElevadorAbaix: 
-		print ("Lower micro PRESS")
-		estatElevador = estatElevadorAbaix
-		client.publish('CTForn/estatElevador',estatElevador)
-	
-def check_upperMicro_event():
-	global estatElevador 
-	if gpio.input(upperMicroPin) and estatElevador != estatElevadorIndeterminat:      
-		print ("Upper micro RELEASED")
-		estatElevador = estatElevadorIndeterminat
-		client.publish('CTForn/estatElevador',estatElevador)
-	elif not gpio.input(upperMicroPin) and estatElevador != estatElevadorAdalt: 
-		print ("Upper micro PRESS")
-		estatElevador = estatElevadorAdalt
-		client.publish('CTForn/estatElevador',estatElevador)
+	if not gpio.input(lowerMicroPin):
+		if estatElevador != estatElevadorAbaix:
+			print ("Lower micro PRESS")
+			estatElevador = estatElevadorAbaix
+			client.publish('CTForn/estatElevador',estatElevador)
+	elif not gpio.input(upperMicroPin):
+		if estatElevador != estatElevadorAdalt:
+			print ("Upper micro PRESS")
+			estatElevador = estatElevadorAdalt
+			client.publish('CTForn/estatElevador',estatElevador)
+	elif estatElevador != estatElevadorIndeterminat:
+		if estatElevador == estatElevadorAbaix:
+			print ("Lower micro RELEASED")
+		else:
+			print ("Upper micro RELEASED")
+	estatElevador = estatElevadorIndeterminat	
+	client.publish('CTForn/estatElevador',estatElevador)
 
 def monitor_events():
     while True:
-        check_lowerMicro_event()
-        check_upperMicro_event()
+        check_lowerAndUpperMicro_event()
         time.sleep(0.3)  # Wait for 0.3 seconds
 
 #def sensorIN_event(channel):
