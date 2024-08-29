@@ -141,7 +141,7 @@ estatVentilador 			=estatVentiladorOFF
 
 def check_lowerAndUpperMicro_event():
 	global estatElevador 
-	if estatElevador == estatElevadorIndeterminat:
+	if estatElevador == estatElevadorEnError:
 		return
 	if not gpio.input(lowerDerMicroPin) or not gpio.input(lowerIzqMicroPin): 
 		if estatElevador != estatElevadorAbaix:
@@ -232,7 +232,7 @@ def sendPulse(pulses, timeBaix, timeAlt):
 
 	global estatSemaforTronja
 	global estatElevador
-	
+
 	gpio.output(pinSemNaran, False) #se mueve el rack 
 	estatSemaforTronja = estatSemaforON
 
