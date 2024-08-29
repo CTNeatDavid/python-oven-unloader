@@ -396,17 +396,22 @@ def moveOnePosition():
 		changeDirection(Abaix)
 		sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
 		changeDirection(Adalt)
-		sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
-		movementStopped()
+
 		if (currentPosition + 1) <= (numeroDePosicion-1):
 			currentPosition = currentPosition +1
 		else:
+			sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
+			movementStopped()
 			return
+		sendPulse(round(pulsosPerPis)*2,velocitatOFF,velocitatON)
+		movementStopped()
 	elif autoDirection == Abaix:
 		if (currentPosition - 1) >= (0):
 			currentPosition = currentPosition -1
 		else:
 			return
+		changeDirection(autoDirection)
+		sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
 			
 	db = MySQLdb.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPass, db=mysqlDB, port=mysqlPort)
 	cur = db.cursor()
@@ -417,8 +422,6 @@ def moveOnePosition():
 	db.close ()
 	
 	print('Current position: ' + str(currentPosition))
-	changeDirection(autoDirection)
-	sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
 	movementStopped()
 
 def readConfParam():
@@ -952,7 +955,7 @@ if __name__ == '__main__':
 		
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO SEMAFOR
 
-		if (estatPlaca == estatPlacaEntrant or autoMode == False):#//situaciones de semaforo en narnaja 
+		if (estatPlaca == estatPlacaEntrant or estatPlaca == estatPlacaDins or autoMode == False):#//situaciones de semaforo en narnaja 
 			if estatSemaforTronja == estatSemaforOFF:
 				estatSemaforTronja = estatSemaforON
 				gpio.output(pinSemNaran, False)
