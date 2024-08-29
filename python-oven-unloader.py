@@ -754,7 +754,7 @@ if __name__ == '__main__':
 	event_thread2.start()
 
 	readConfParam()
-	levelthePlatformYouAreDrunk()
+	#levelthePlatformYouAreDrunk()
 	#goToYourNearestHomeYouAreDrunk()
 	#goToYourPosition()
 
@@ -873,6 +873,7 @@ if __name__ == '__main__':
 			deleteAlarm()
 
 			if resetRequested:
+				print ("1")
 				goToYourNearestHomeYouAreDrunk()
 				if currentPosition >= (numeroDePosicion/2):
 					currentPosition = numeroDePosicion-1
@@ -881,12 +882,14 @@ if __name__ == '__main__':
 					currentPosition = 0
 					autoDirection = Adalt
 			elif upperResetRequested:
+				print ("2")
 				moveToUpperHome()
 				referencePos = upperReference
 				print('Upper home reached!')
 				currentPosition = numeroDePosicion-1
 				autoDirection = Abaix
 			elif lowerResetRequested:
+				print ("3")
 				moveToLowerHome()
 				referencePos = lowerReference
 				print('Lower home reached!')
