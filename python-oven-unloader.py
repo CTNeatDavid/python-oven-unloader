@@ -331,7 +331,7 @@ def levelthePlatformYouAreDrunk():
 		if izquiNoLevel:#el izquierdo aun no ha llegado
 			gpio.output(pulsePinIzquierdo, valorAlt)
 		usleep(velocitatON*2)
-		if derechoNoLevel and izquiNoLevel:
+		if not derechoNoLevel and not izquiNoLevel:
 			platformLeveled = True
 
 	gpio.output(pinSemNaran, True) #rack parado
