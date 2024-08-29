@@ -317,7 +317,7 @@ def levelthePlatformYouAreDrunk():
 	izquiNoLevel = True
 	while not platformLeveled and stopMovement == False:
 		derechoNoLevel = gpio.input(lowerDerMicroPin)
-		izquiNoLevel = gpio.input(lowerDerMicroPin)
+		izquiNoLevel = gpio.input(lowerIzqMicroPin)
 
 		if derechoNoLevel:#el derecho aun no ha llegado
 			gpio.output(pulsePinDerecho, valorBaix)
