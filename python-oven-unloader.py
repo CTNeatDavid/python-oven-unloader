@@ -759,7 +759,7 @@ if __name__ == '__main__':
 	event_thread2.start()
 
 	readConfParam()
-	levelthePlatformYouAreDrunk
+	levelthePlatformYouAreDrunk()
 	#goToYourNearestHomeYouAreDrunk()
 	goToYourPosition()
 
