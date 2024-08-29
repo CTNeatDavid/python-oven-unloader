@@ -305,8 +305,6 @@ def levelthePlatformYouAreDrunk():
 
 	global referencePos
 	global estatSemaforTronja
-	global currentPosition
-	global autoDirection
 	global estatElevador
 
 	print('Leveling platform...')
@@ -339,12 +337,9 @@ def levelthePlatformYouAreDrunk():
 
 	if platformLeveled:
 		referencePos = lowerReference
-		currentPosition = 0
-		autoDirection = Adalt
 		goToYourPosition()
 	else:
 		estatElevador = estatElevadorEnError
-
 
 def goToYourNearestHomeYouAreDrunk():
 	global referencePos
@@ -761,8 +756,7 @@ if __name__ == '__main__':
 	readConfParam()
 	levelthePlatformYouAreDrunk()
 	#goToYourNearestHomeYouAreDrunk()
-	goToYourPosition()
-
+	#goToYourPosition()
 
 	lastUpdated = datetime.now()
 	horaOnVentilador = datetime.now()
