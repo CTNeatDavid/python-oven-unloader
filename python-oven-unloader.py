@@ -73,7 +73,7 @@ estatPlaca 					= estatPlacaIndeterminat
 
 estatSemaforON				= 1
 estatSemaforOFF				= 0
-estatSemaforVerd			= estatSemaforON
+estatSemaforVerd			= estatSemaforOFF
 estatSemaforTronja			= estatSemaforOFF
 estatSemaforVermell			= estatSemaforOFF
 
@@ -195,6 +195,7 @@ def gestionIntermitenciaSem():
 
 	global valorAtualIntermitencia
 	if estatPitoSemafor == estatPitoSemaforON:
+		print ("Int sem")
 		gpio.output(pionSemPito, valorAtualIntermitencia)
 		gpio.output(pinSemRojo, valorAtualIntermitencia)
 		if valorAtualIntermitencia == valorAlt:
