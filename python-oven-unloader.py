@@ -262,11 +262,13 @@ def sendPulse(pulses, timeBaix, timeAlt):
 		gpio.output(pulsePinDerecho, valorAlt)
 		gpio.output(pulsePinIzquierdo, valorAlt)
 		usleep(timeAlt)
-		if (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)):
+		if ( not gpio.input(sensorINPin1) or not gpio.input(sensorINPin2)):
 			time.sleep(0.5)
-			if (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)):
+			if (not gpio.input(sensorINPin1) or not gpio.input(sensorINPin2)):
 				stopMovement = True
+				print('Detectada placa entrada en medio del movimiento del elevador')
 	if stopMovement == True:
+		print('Error en el elevador, se detiene el movimiento')
 		estatElevador = estatElevadorEnError
 	if currentDirection == Abaix:
 		print('Stopping motor')
@@ -814,17 +816,17 @@ if __name__ == '__main__':
 		#//-------------------------------------------------------------------------------------------------------------------------------------------------------------FI LOOP EVERY 5s
 
 		#//-------------------------------------------------------------------------------------------------------------------------------------------------------------GESTIO SENSOR PLACA
-		if (gpio.input(sensorINPin1) or gpio.input(sensorINPin2))and estatPlaca == estatPlacaEntrant and autoMode == True:
+		if (gpio.input(sensorINPin1) and gpio.input(sensorINPin2)) and estatPlaca == estatPlacaEntrant and autoMode == True:
 			time.sleep(0.5)
-			if (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)):
+			if (gpio.input(sensorINPin1) and gpio.input(sensorINPin2)):
 				estatPlaca = estatPlacaDins   		
 				print ("Placa dins del sistema")
 				client.publish('CTForn/estatPlate',estatPlaca)
 				needToMoveOnePosition = True
 				horaPlacaForaDeSensor = datetime.now()
-		elif not (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)) and estatPlaca != estatPlacaEntrant and autoMode == True:
+		elif  (not gpio.input(sensorINPin1) or not gpio.input(sensorINPin2)) and estatPlaca != estatPlacaEntrant and autoMode == True:
 			time.sleep(0.5)
-			if not (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)):
+			if (not gpio.input(sensorINPin1) or not gpio.input(sensorINPin2)):
 				estatPlaca = estatPlacaEntrant
 				print ("Placa entrant al sistema")
 				client.publish('CTForn/estatPlate',estatPlaca)
