@@ -59,6 +59,7 @@ currentDirection 			= direccioIndeterminada
 estatElevadorIndeterminat 	= 1
 estatElevadorAbaix 			= 2
 estatElevadorAdalt			= 3
+estatElevadorEnError		= 4
 estatElevador 				= estatElevadorIndeterminat
 
 estatCarregadorIndeterminat	= 0
@@ -69,6 +70,20 @@ estatPlacaEntrant		 	= 1
 estatPlacaDins	 			= 2
 estatPlacaIndeterminat		= 3
 estatPlaca 					= estatPlacaIndeterminat
+
+estatSemaforON				= 1
+estatSemaforOFF				= 0
+estatSemaforVerd			= estatSemaforON
+estatSemaforTronja			= estatSemaforOFF
+estatSemaforVermell			= estatSemaforOFF
+
+estatPitoSemaforOFF			= 0
+estatPitoSemaforON			= 1
+estatDesitjatPitoSemafor	= estatPitoSemaforOFF
+estatPitoSemafor			= estatPitoSemaforOFF
+
+valorAtualIntermitencia		= valorAlt
+tiempoIntermitenciaSemaforo = 2
 
 numeroDePosicion			= 0
 currentPosition 			= 0
@@ -126,7 +141,9 @@ estatVentilador 			=estatVentiladorOFF
 
 def check_lowerAndUpperMicro_event():
 	global estatElevador 
-	if not gpio.input(lowerDerMicroPin):
+	if estatElevador == estatElevadorIndeterminat:
+		return
+	if not gpio.input(lowerDerMicroPin) or not gpio.input(lowerIzqMicroPin): 
 		if estatElevador != estatElevadorAbaix:
 			print ("Lower micro PRESS")
 			estatElevador = estatElevadorAbaix
@@ -147,7 +164,7 @@ def check_lowerAndUpperMicro_event():
 def monitor_events():
     while True:
         check_lowerAndUpperMicro_event()
-        time.sleep(0.3)  # Wait for 0.3 seconds
+        time.sleep(0.2)  # Wait for 0.3 seconds
 
 #def sensorIN_event(channel):
 #	global estatPlaca 
@@ -173,7 +190,22 @@ def monitor_events():
 #	gpio.remove_event_detect(sensorINPin)
 #	time.sleep(0.1)
 #	gpio.add_event_detect(sensorINPin, gpio.BOTH, callback=sensorIN_event,bouncetime=10)
-		
+
+def gestionIntermitenciaSem():
+
+	if estatPitoSemafor == estatPitoSemaforON:
+		gpio.output(pionSemPito, valorAtualIntermitencia)
+		gpio.output(pinSemRojo, valorAtualIntermitencia)
+		if valorAtualIntermitencia == valorAlt:
+			valorAtualIntermitencia = valorBaix
+		else:
+			valorAtualIntermitencia = valorAlt
+
+def intermitencia_sem():
+    while True:
+        gestionIntermitenciaSem()
+        time.sleep(tiempoIntermitenciaSemaforo) 
+
 
 def enableDriver(Direcction):
 
@@ -198,9 +230,15 @@ def disableDriver():
 
 def sendPulse(pulses, timeBaix, timeAlt):
 
+	global estatSemaforTronja
+	
+	gpio.output(pinSemNaran, False) #se mueve el rack 
+	estatSemaforTronja = estatSemaforON
 	if estatElevador == estatElevadorAbaix and currentDirection == Abaix:
 		return
 	elif estatElevador == estatElevadorAdalt and currentDirection == Adalt:
+		return
+	elif estatElevador == estatElevadorEnError:
 		return
 	sent = 0
 	usleep = lambda x: time.sleep(x/1000000.0)
@@ -213,7 +251,10 @@ def sendPulse(pulses, timeBaix, timeAlt):
 		gpio.output(pulsePinDerecho, valorAlt)
 		gpio.output(pulsePinIzquierdo, valorAlt)
 		usleep(timeAlt)
-	#if stopMovement == True:
+	if stopMovement == True:
+		estatElevador = estatElevadorEnError
+	gpio.output(pinSemNaran, True) #rack parado
+	estatSemaforTronja = estatSemaforOFF
 	return
 
 def movementStopped():
@@ -234,11 +275,15 @@ def changeDirection(newDir):
 			return
 		elif estatElevador == estatElevadorAdalt and currentDirection == Adalt:
 			return
+		elif estatElevador == estatElevadorEnError:
+			return
 		
 		disableDriver()
 		enableDriver(newDir)
 		
 def goToYourPosition():
+	if ( estatElevador == estatElevadorEnError):
+		return
 	print('Going to the current position...')
 	if referencePos == upperReference:
 		changeDirection(Abaix)
@@ -267,14 +312,14 @@ def goToYourNearestHomeYouAreDrunk():
 def moveToUpperHome():
 	print('Going up')
 	changeDirection(Adalt)
-	while estatElevador != estatElevadorAdalt and stopMovement == False:		
+	while estatElevador != estatElevadorAdalt and stopMovement == False and estatElevador != estatElevadorEnError:		
 		sendPulse(pulsosPerRev,velocitatOFF,velocitatON)
 	movementStopped()
 
 def moveToLowerHome():
 	print('Going down')
 	changeDirection(Abaix)
-	while estatElevador != estatElevadorAbaix and stopMovement == False:		
+	while estatElevador != estatElevadorAbaix and stopMovement == False and estatElevador != estatElevadorEnError:		
 		sendPulse(pulsosPerRev,velocitatOFF,velocitatON)
 	movementStopped()
 
@@ -561,7 +606,7 @@ client.on_message = on_message
 
 if __name__ == '__main__':
 
-	
+
 	machineName = socket.gethostname()
 	machineIP = ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)),s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
 
@@ -625,6 +670,8 @@ if __name__ == '__main__':
 	while Connected != True:    						#Wait for connection
 		time.sleep(0.1)
         
+
+		
 	client.subscribe('CTForn/SendPulses')
 	client.subscribe('CTForn/TurnMotor')
 	client.subscribe('CTForn/ARE_YOU_HERE')
@@ -657,6 +704,10 @@ if __name__ == '__main__':
 	# Start the monitoring thread
 	event_thread = threading.Thread(target=monitor_events)
 	event_thread.start()
+
+	# Start the monitoring thread
+	event_thread2 = threading.Thread(target=intermitencia_sem)
+	event_thread2.start()
 
 	readConfParam()
 	goToYourNearestHomeYouAreDrunk()
@@ -767,6 +818,13 @@ if __name__ == '__main__':
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO DE RESETS
 		if (resetRequested or upperResetRequested or lowerResetRequested) and estatPlaca != estatPlacaEntrant:
 
+			estatElevador = estatElevadorIndeterminat
+			if gpio.input(lowerDerMicroPin) == 0: 
+				estatElevador = estatElevadorAbaix
+				print('Elevador abaix!')
+			elif gpio.input(upperDerMicroPin) == 0:
+				print('Elevador adalt!')
+				estatElevador = estatElevadorAdalt
 
 			deleteAlarm()
 
@@ -811,5 +869,41 @@ if __name__ == '__main__':
 			client.publish('CTForn/updateMySQL',estatPlaca)
 			print('Reset done!')
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- FI GESTIO RESETS		
+
+		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO SEMAFOR
+
+		if (estatPlaca == estatPlacaEntrant):#//situaciones de semaforo en narnaja 
+			estatSemaforTronja = estatSemaforON
+		else:
+			if estatSemaforTronja == estatSemaforON:#lo apagamos
+				gpio.output(pinSemNaran, True)
+				estatSemaforTronja = estatSemaforOFF
+
+		if (estatSMEMA == estatSMEMA_OFF or estatElevador == estatElevadorEnError):#//situaciones de semaforo en rojo
+			estatSemaforVermell = estatSemaforON 
+		else:
+			if estatSemaforVermell == estatSemaforON:#lo apagamos
+				gpio.output(pinSemRojo, True)
+				estatSemaforVermell = estatSemaforOFF
+
+		if (estatSemaforVermell == estatSemaforON):#// El pito se enciende con el semaforo rojo
+			estatPitoSemafor = estatPitoSemaforON
+		else:
+			if estatPitoSemafor == estatPitoSemaforON:#lo apagamos
+				gpio.output(pionSemPito, True)
+				estatPitoSemafor = estatPitoSemaforOFF
+
+		if (estatSemaforTronja == estatSemaforON or estatSemaforVermell == estatSemaforON): #// si no hay ningun semaforo se enciende el verde
+			#apagamos el led verde
+			if estatSemaforVerd == estatPitoSemaforON:
+				gpio.output(pinSemVerde, True)
+				estatSemaforVerd = estatSemaforOFF
+		else:
+			if estatSemaforVerd == estatSemaforOFF:
+				gpio.output(pinSemVerde, False)
+				estatSemaforVerd = estatSemaforON
+			
+
+		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- FI GESTIO SEMAFOR	
 		time.sleep(0.4)
 
