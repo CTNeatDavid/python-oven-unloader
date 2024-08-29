@@ -231,9 +231,11 @@ def disableDriver():
 def sendPulse(pulses, timeBaix, timeAlt):
 
 	global estatSemaforTronja
+	global estatElevador
 	
 	gpio.output(pinSemNaran, False) #se mueve el rack 
 	estatSemaforTronja = estatSemaforON
+
 	if estatElevador == estatElevadorAbaix and currentDirection == Abaix:
 		return
 	elif estatElevador == estatElevadorAdalt and currentDirection == Adalt:
@@ -253,6 +255,7 @@ def sendPulse(pulses, timeBaix, timeAlt):
 		usleep(timeAlt)
 	if stopMovement == True:
 		estatElevador = estatElevadorEnError
+
 	gpio.output(pinSemNaran, True) #rack parado
 	estatSemaforTronja = estatSemaforOFF
 	return
