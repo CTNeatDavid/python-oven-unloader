@@ -61,6 +61,7 @@ estatElevadorAbaix 			= 2
 estatElevadorAdalt			= 3
 estatElevadorEnError		= 4
 estatElevador 				= estatElevadorIndeterminat
+elevadorPerformingReset		= False
 
 estatCarregadorIndeterminat	= 0
 estatCarregadorPle			= 1
@@ -895,6 +896,7 @@ if __name__ == '__main__':
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO DE RESETS
 		if (resetRequested or upperResetRequested or lowerResetRequested) and estatPlaca != estatPlacaEntrant:
 
+			elevadorPerformingReset = True
 			estatElevador = estatElevadorIndeterminat
 			if gpio.input(lowerDerMicroPin) == 0: 
 				estatElevador = estatElevadorAbaix
@@ -945,6 +947,7 @@ if __name__ == '__main__':
 			db.close ()
 			client.publish('CTForn/updateMySQL',estatPlaca)
 			print('Reset done!')
+			elevadorPerformingReset = False
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- FI GESTIO RESETS		
 
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO DE LEVEL PLATFORM
@@ -964,7 +967,7 @@ if __name__ == '__main__':
 				gpio.output(pinSemNaran, True)
 				estatSemaforTronja = estatSemaforOFF
 
-		if (estatSMEMA == estatSMEMA_OFF or estatElevador == estatElevadorEnError):#//situaciones de semaforo en rojo
+		if (estatSMEMA == estatSMEMA_OFF or (estatElevador == estatElevadorEnError and elevadorPerformingReset == False)):#//situaciones de semaforo en rojo
 			if estatSemaforVermell == estatSemaforOFF:
 				estatSemaforVermell = estatSemaforON
 				gpio.output(pinSemRojo, False)
