@@ -25,16 +25,23 @@ mysqlPort					= 3307
 machineName					= ""
 machineIP					= ""
 
-enablePin 					= 16
-dirPin 						= 20
-pulsePin 					= 21
-lowerMicroPin 				= 26
-upperMicroPin				= 19
-sensorINPin					= 5
-rackINPin					= 13
-motorInPin					= 6
-SMEMAPin					= 12
+enableMotorPin 				= 16#
+dirMotorPin 				= 21#
+pulsePinDerecho 			= 18#
+pulsePinIzquierdo 			= 6#
+lowerDerMicroPin 			= 23#
+lowerIzqMicroPin 			= 14#
+upperDerMicroPin			= 15#
+sensorINPin1				= 22#
+sensorINPin2				= 20#
+rackINPin					= 19#
+motorInPin					= 13#
+SMEMAPin					= 2#
 ventiladorPin				= 7
+pinSemVerde					= 17#
+pinSemRojo					= 12#
+pinSemNaran					= 7#
+pionSemPito					= 27#
 
 valorBaix 					= False
 valorAlt 					= True
@@ -119,12 +126,12 @@ estatVentilador 			=estatVentiladorOFF
 
 def check_lowerAndUpperMicro_event():
 	global estatElevador 
-	if not gpio.input(lowerMicroPin):
+	if not gpio.input(lowerDerMicroPin):
 		if estatElevador != estatElevadorAbaix:
 			print ("Lower micro PRESS")
 			estatElevador = estatElevadorAbaix
 			client.publish('CTForn/estatElevador',estatElevador)
-	elif not gpio.input(upperMicroPin):
+	elif not gpio.input(upperDerMicroPin):
 		if estatElevador != estatElevadorAdalt:
 			print ("Upper micro PRESS")
 			estatElevador = estatElevadorAdalt
@@ -171,21 +178,21 @@ def monitor_events():
 def enableDriver(Direcction):
 
 	usleep = lambda x: time.sleep(x/1000000.0)
-	gpio.output(enablePin, valorAlt)
+	gpio.output(enableMotorPin, valorAlt)
 	usleep(200)
 	if Direcction == 1:		
-		gpio.output(dirPin, valorBaix)
+		gpio.output(dirMotorPin, valorBaix)
 	elif Direcction == 2:
-		gpio.output(dirPin, valorAlt)
+		gpio.output(dirMotorPin, valorAlt)
 	usleep(200)
 	return
 	
 def disableDriver():
 
 	usleep = lambda x: time.sleep(x/1000000.0)
-	gpio.output(enablePin, valorBaix)
+	gpio.output(enableMotorPin, valorBaix)
 	usleep(200)
-	gpio.output(dirPin, valorAlt)
+	gpio.output(dirMotorPin, valorAlt)
 	usleep(200)
 	return
 
@@ -200,9 +207,11 @@ def sendPulse(pulses, timeBaix, timeAlt):
 	client.publish('CTForn/movingElevator',currentDirection)
 	while sent<pulses and stopMovement == False and ((estatElevador == estatElevadorAdalt and currentDirection == Abaix) or (estatElevador == estatElevadorAbaix and currentDirection == Adalt) or (estatElevador == estatElevadorIndeterminat)):
 		sent=sent+1
-		gpio.output(pulsePin, valorBaix)
+		gpio.output(pulsePinDerecho, valorBaix)
+		gpio.output(pulsePinIzquierdo, valorBaix)
 		usleep(timeBaix)
-		gpio.output(pulsePin, valorAlt)
+		gpio.output(pulsePinDerecho, valorAlt)
+		gpio.output(pulsePinIzquierdo, valorAlt)
 		usleep(timeAlt)
 	#if stopMovement == True:
 	return
@@ -561,29 +570,46 @@ if __name__ == '__main__':
 
 	gpio.setwarnings(False)
 	gpio.setmode(gpio.BCM)
-	gpio.setup(enablePin, gpio.OUT)
-	gpio.output(enablePin, valorBaix)
-	gpio.setup(dirPin, gpio.OUT)
-	gpio.output(dirPin, valorAlt)
-	gpio.setup(pulsePin, gpio.OUT)
-	gpio.output(pulsePin, valorAlt)
-	gpio.setup(lowerMicroPin, gpio.IN)
+	gpio.setup(enableMotorPin, gpio.OUT)
+	gpio.output(enableMotorPin, valorBaix)
+	gpio.setup(dirMotorPin, gpio.OUT)
+	gpio.output(dirMotorPin, valorAlt)
+	gpio.setup(pulsePinDerecho, gpio.OUT)
+	gpio.output(pulsePinDerecho, valorAlt)
+	gpio.setup(pulsePinIzquierdo, gpio.OUT)
+	gpio.output(pulsePinIzquierdo, valorAlt)
+
+	gpio.setup(lowerDerMicroPin, gpio.IN)
+	gpio.setup(lowerIzqMicroPin, gpio.IN)
+	gpio.setup(upperDerMicroPin, gpio.IN)
+
+	gpio.setup(sensorINPin1, gpio.IN, pull_up_down=gpio.PUD_UP)
+	gpio.setup(sensorINPin2, gpio.IN, pull_up_down=gpio.PUD_UP)
+
+	gpio.setup(rackINPin, gpio.IN, pull_up_down=gpio.PUD_UP)
+
 	gpio.setup(motorInPin, gpio.OUT)
 	gpio.output(motorInPin, False)
+
 	gpio.setup(SMEMAPin, gpio.OUT)
 	gpio.output(SMEMAPin, True)
+
 	gpio.setup(ventiladorPin, gpio.OUT)
 	gpio.output(ventiladorPin, False)
-	#gpio.add_event_detect(lowerMicroPin, gpio.BOTH, callback=lowerMicro_event)
-	gpio.setup(upperMicroPin, gpio.IN)
-	#gpio.add_event_detect(upperMicroPin, gpio.BOTH, callback=upperMicro_event)
-	gpio.setup(sensorINPin, gpio.IN, pull_up_down=gpio.PUD_UP)
-	gpio.setup(rackINPin, gpio.IN, pull_up_down=gpio.PUD_UP)
-	# ~ gpio.add_event_detect(sensorINPin, gpio.BOTH, callback=sensorIN_event,bouncetime=10)
-	if gpio.input(lowerMicroPin) == 0: 
+
+	gpio.setup(pinSemVerde, gpio.OUT)
+	gpio.output(pinSemVerde, False)
+	gpio.setup(pinSemRojo, gpio.OUT)
+	gpio.output(pinSemRojo, False)
+	gpio.setup(pinSemNaran, gpio.OUT)
+	gpio.output(pinSemNaran, False)
+	gpio.setup(pionSemPito, gpio.OUT)
+	gpio.output(pionSemPito, False)
+	
+	if gpio.input(lowerDerMicroPin) == 0: 
 		estatElevador = estatElevadorAbaix
 		print('Elevador abaix!')
-	elif gpio.input(upperMicroPin) == 0:
+	elif gpio.input(upperDerMicroPin) == 0:
 		print('Elevador adalt!')
 		estatElevador = estatElevadorAdalt
 
@@ -629,8 +655,8 @@ if __name__ == '__main__':
 	db.close ()
 	
 	# Start the monitoring thread
-	#event_thread = threading.Thread(target=monitor_events)
-	#event_thread.start()
+	event_thread = threading.Thread(target=monitor_events)
+	event_thread.start()
 
 	readConfParam()
 	goToYourNearestHomeYouAreDrunk()
@@ -665,17 +691,17 @@ if __name__ == '__main__':
 		#//-------------------------------------------------------------------------------------------------------------------------------------------------------------FI LOOP EVERY 5s
 
 		#//-------------------------------------------------------------------------------------------------------------------------------------------------------------GESTIO SENSOR PLACA
-		if gpio.input(sensorINPin) and estatPlaca == estatPlacaEntrant and autoMode == True:
+		if gpio.input(sensorINPin1) and estatPlaca == estatPlacaEntrant and autoMode == True:
 			time.sleep(0.5)
-			if gpio.input(sensorINPin):
+			if gpio.input(sensorINPin1):
 				estatPlaca = estatPlacaDins   		
 				print ("Placa dins del sistema")
 				client.publish('CTForn/estatPlate',estatPlaca)
 				needToMoveOnePosition = True
 				horaPlacaForaDeSensor = datetime.now()
-		elif not gpio.input(sensorINPin) and estatPlaca != estatPlacaEntrant and autoMode == True:
+		elif not gpio.input(sensorINPin1) and estatPlaca != estatPlacaEntrant and autoMode == True:
 			time.sleep(0.5)
-			if not gpio.input(sensorINPin):
+			if not gpio.input(sensorINPin1):
 				estatPlaca = estatPlacaEntrant
 				print ("Placa entrant al sistema")
 				client.publish('CTForn/estatPlate',estatPlaca)
