@@ -193,6 +193,7 @@ def monitor_events():
 
 def gestionIntermitenciaSem():
 
+	global valorAtualIntermitencia
 	if estatPitoSemafor == estatPitoSemaforON:
 		gpio.output(pionSemPito, valorAtualIntermitencia)
 		gpio.output(pinSemRojo, valorAtualIntermitencia)
