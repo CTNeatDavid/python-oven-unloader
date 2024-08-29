@@ -116,6 +116,7 @@ upperResetRequested			= False
 lowerResetRequested			= False
 autoMode					= True
 stopMovement				= False
+levelPlatformRequest		= False
 
 estatRackIN					= 1
 estatRackOUT				= 0
@@ -508,6 +509,7 @@ def on_message(client, userdata, message):
 	global upperResetRequested
 	global lowerResetRequested
 	global stopMovement
+	global levelPlatformRequest
 	try:
 		message.payload = message.payload.decode("utf-8")
 		print( 'Message received: ' + message.payload + ' of the topic ' + message.topic)
@@ -637,6 +639,9 @@ def on_message(client, userdata, message):
 		elif message.topic == 'CTForn/stopMovement':
 			print('Request to stop the movement')
 			stopMovement = True
+		elif message.topic == 'CTForn/LevelPlatform':
+			print('Request to level the platform')
+			levelPlatformRequest = True
 		return
 	except Exception as e:
 	    print('Exception message: ' + str(e))       
@@ -730,6 +735,7 @@ if __name__ == '__main__':
 	client.subscribe('CTForn/AutoMode')
 	client.subscribe('CTForn/UpperReset')
 	client.subscribe('CTForn/LowerReset')
+	client.subscribe('CTForn/LevelPlatform')
 	client.subscribe('CTForn/UpdateFromMySQL')
 	client.subscribe('CTForn/currentMode')
 	client.subscribe('CTForn/stopMovement')
@@ -754,7 +760,7 @@ if __name__ == '__main__':
 	event_thread2.start()
 
 	readConfParam()
-	#levelthePlatformYouAreDrunk()
+	levelthePlatformYouAreDrunk()
 	#goToYourNearestHomeYouAreDrunk()
 	#goToYourPosition()
 
@@ -873,7 +879,6 @@ if __name__ == '__main__':
 			deleteAlarm()
 
 			if resetRequested:
-				print ("1")
 				goToYourNearestHomeYouAreDrunk()
 				if currentPosition >= (numeroDePosicion/2):
 					currentPosition = numeroDePosicion-1
@@ -882,14 +887,12 @@ if __name__ == '__main__':
 					currentPosition = 0
 					autoDirection = Adalt
 			elif upperResetRequested:
-				print ("2")
 				moveToUpperHome()
 				referencePos = upperReference
 				print('Upper home reached!')
 				currentPosition = numeroDePosicion-1
 				autoDirection = Abaix
 			elif lowerResetRequested:
-				print ("3")
 				moveToLowerHome()
 				referencePos = lowerReference
 				print('Lower home reached!')
@@ -917,6 +920,12 @@ if __name__ == '__main__':
 			print('Reset done!')
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- FI GESTIO RESETS		
 
+		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO DE LEVEL PLATFORM
+		if (levelPlatformRequest) and estatPlaca != estatPlacaEntrant:
+			levelthePlatformYouAreDrunk()
+			levelPlatformRequest = False
+		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- FI GESTIO DE LEVEL PLATFORM
+		
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO SEMAFOR
 
 		if (estatPlaca == estatPlacaEntrant or autoMode == True):#//situaciones de semaforo en narnaja 
