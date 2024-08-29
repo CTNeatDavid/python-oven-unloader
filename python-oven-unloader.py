@@ -234,7 +234,7 @@ def sendPulse(pulses, timeBaix, timeAlt):
 
 	global estatSemaforTronja
 	global estatElevador
-
+	global estatMotorIN
 	gpio.output(pinSemNaran, False) #se mueve el rack 
 	estatSemaforTronja = estatSemaforON
 
@@ -245,6 +245,12 @@ def sendPulse(pulses, timeBaix, timeAlt):
 	elif estatElevador == estatElevadorEnError:
 		return
 	sent = 0
+
+	if currentDirection == Abaix:
+		print('Starting motor')
+		gpio.output(motorInPin, True)
+		estatMotorIN = estatMotorINON
+		client.publish('CTForn/estatMotorIN',estatMotorIN)			
 	usleep = lambda x: time.sleep(x/1000000.0)
 	client.publish('CTForn/movingElevator',currentDirection)
 	while sent<pulses and stopMovement == False and ((estatElevador == estatElevadorAdalt and currentDirection == Abaix) or (estatElevador == estatElevadorAbaix and currentDirection == Adalt) or (estatElevador == estatElevadorIndeterminat)):
@@ -255,8 +261,17 @@ def sendPulse(pulses, timeBaix, timeAlt):
 		gpio.output(pulsePinDerecho, valorAlt)
 		gpio.output(pulsePinIzquierdo, valorAlt)
 		usleep(timeAlt)
+		if (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)):
+			time.sleep(0.5)
+			if (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)):
+				stopMovement = True
 	if stopMovement == True:
 		estatElevador = estatElevadorEnError
+	if currentDirection == Abaix:
+		print('Stopping motor')
+		gpio.output(motorInPin, False)
+		estatMotorIN = estatMotorINOFF
+		client.publish('CTForn/estatMotorIN',estatMotorIN)	
 
 	gpio.output(pinSemNaran, True) #rack parado
 	estatSemaforTronja = estatSemaforOFF
@@ -374,6 +389,12 @@ def moveOnePosition():
 	print('Moving one position from ' + str(currentPosition))
 	
 	if autoDirection == Adalt:
+		#primer ens movem una posicio avall per posar tot be al rack
+		changeDirection(Abaix)
+		sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
+		changeDirection(Adalt)
+		sendPulse(round(pulsosPerPis),velocitatOFF,velocitatON)
+		movementStopped()
 		if (currentPosition + 1) <= (numeroDePosicion-1):
 			currentPosition = currentPosition +1
 		else:
