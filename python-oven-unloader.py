@@ -598,13 +598,13 @@ if __name__ == '__main__':
 	gpio.output(ventiladorPin, False)
 
 	gpio.setup(pinSemVerde, gpio.OUT)
-	gpio.output(pinSemVerde, False)
+	gpio.output(pinSemVerde, True)
 	gpio.setup(pinSemRojo, gpio.OUT)
-	gpio.output(pinSemRojo, False)
+	gpio.output(pinSemRojo, True)
 	gpio.setup(pinSemNaran, gpio.OUT)
-	gpio.output(pinSemNaran, False)
+	gpio.output(pinSemNaran, True)
 	gpio.setup(pionSemPito, gpio.OUT)
-	gpio.output(pionSemPito, False)
+	gpio.output(pionSemPito, True)
 	
 	if gpio.input(lowerDerMicroPin) == 0: 
 		estatElevador = estatElevadorAbaix
