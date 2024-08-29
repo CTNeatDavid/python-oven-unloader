@@ -952,7 +952,7 @@ if __name__ == '__main__':
 		
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO SEMAFOR
 
-		if (estatPlaca == estatPlacaEntrant or autoMode == True):#//situaciones de semaforo en narnaja 
+		if (estatPlaca == estatPlacaEntrant or autoMode == False):#//situaciones de semaforo en narnaja 
 			if estatSemaforTronja == estatSemaforOFF:
 				estatSemaforTronja = estatSemaforON
 				gpio.output(pinSemNaran, False)
