@@ -195,7 +195,6 @@ def gestionIntermitenciaSem():
 
 	global valorAtualIntermitencia
 	if estatPitoSemafor == estatPitoSemaforON:
-		print ("Int sem")
 		gpio.output(pionSemPito, valorAtualIntermitencia)
 		gpio.output(pinSemRojo, valorAtualIntermitencia)
 		if valorAtualIntermitencia == valorAlt:
@@ -301,7 +300,52 @@ def goToYourPosition():
 		sendPulse(pulsosToSend,velocitatOFF,velocitatON)
 		movementStopped()
 	print('Current position reached!')
-		
+
+def levelthePlatformYouAreDrunk():
+
+	global referencePos
+	global estatSemaforTronja
+	global currentPosition
+	global autoDirection
+	global estatElevador
+
+	print('Leveling platform...')
+	changeDirection(Abaix)
+
+	platformLeveled = False
+	usleep = lambda x: time.sleep(x/1000000.0)
+	gpio.output(pinSemNaran, False) #se mueve el rack 
+	derechoNoLevel = True
+	izquiNoLevel = True
+	while not platformLeveled and stopMovement == False:
+		derechoNoLevel = gpio.input(lowerDerMicroPin)
+		izquiNoLevel = gpio.input(lowerDerMicroPin)
+
+		if derechoNoLevel:#el derecho aun no ha llegado
+			gpio.output(pulsePinDerecho, valorBaix)
+		if izquiNoLevel:#el izquierdo aun no ha llegado
+			gpio.output(pulsePinIzquierdo, valorBaix)
+		usleep(velocitatOFF*2)
+		if derechoNoLevel:#el derecho aun no ha llegado
+			gpio.output(pulsePinDerecho, valorAlt)
+		if izquiNoLevel:#el izquierdo aun no ha llegado
+			gpio.output(pulsePinIzquierdo, valorAlt)
+		usleep(velocitatON*2)
+		if derechoNoLevel and izquiNoLevel:
+			platformLeveled = True
+
+	gpio.output(pinSemNaran, True) #rack parado
+	estatSemaforTronja = estatSemaforOFF
+
+	if platformLeveled:
+		referencePos = lowerReference
+		currentPosition = 0
+		autoDirection = Adalt
+		goToYourPosition()
+	else:
+		estatElevador = estatElevadorEnError
+
+
 def goToYourNearestHomeYouAreDrunk():
 	global referencePos
 	print('Going home...')
@@ -715,7 +759,8 @@ if __name__ == '__main__':
 	event_thread2.start()
 
 	readConfParam()
-	goToYourNearestHomeYouAreDrunk()
+	levelthePlatformYouAreDrunk
+	#goToYourNearestHomeYouAreDrunk()
 	goToYourPosition()
 
 
@@ -747,17 +792,17 @@ if __name__ == '__main__':
 		#//-------------------------------------------------------------------------------------------------------------------------------------------------------------FI LOOP EVERY 5s
 
 		#//-------------------------------------------------------------------------------------------------------------------------------------------------------------GESTIO SENSOR PLACA
-		if gpio.input(sensorINPin1) and estatPlaca == estatPlacaEntrant and autoMode == True:
+		if (gpio.input(sensorINPin1) or gpio.input(sensorINPin2))and estatPlaca == estatPlacaEntrant and autoMode == True:
 			time.sleep(0.5)
-			if gpio.input(sensorINPin1):
+			if (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)):
 				estatPlaca = estatPlacaDins   		
 				print ("Placa dins del sistema")
 				client.publish('CTForn/estatPlate',estatPlaca)
 				needToMoveOnePosition = True
 				horaPlacaForaDeSensor = datetime.now()
-		elif not gpio.input(sensorINPin1) and estatPlaca != estatPlacaEntrant and autoMode == True:
+		elif not (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)) and estatPlaca != estatPlacaEntrant and autoMode == True:
 			time.sleep(0.5)
-			if not gpio.input(sensorINPin1):
+			if not (gpio.input(sensorINPin1) or gpio.input(sensorINPin2)):
 				estatPlaca = estatPlacaEntrant
 				print ("Placa entrant al sistema")
 				client.publish('CTForn/estatPlate',estatPlaca)
@@ -877,15 +922,19 @@ if __name__ == '__main__':
 
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO SEMAFOR
 
-		if (estatPlaca == estatPlacaEntrant):#//situaciones de semaforo en narnaja 
-			estatSemaforTronja = estatSemaforON
+		if (estatPlaca == estatPlacaEntrant or autoMode == True):#//situaciones de semaforo en narnaja 
+			if estatSemaforTronja == estatSemaforOFF:
+				estatSemaforTronja = estatSemaforON
+				gpio.output(pinSemNaran, False)
 		else:
 			if estatSemaforTronja == estatSemaforON:#lo apagamos
 				gpio.output(pinSemNaran, True)
 				estatSemaforTronja = estatSemaforOFF
 
 		if (estatSMEMA == estatSMEMA_OFF or estatElevador == estatElevadorEnError):#//situaciones de semaforo en rojo
-			estatSemaforVermell = estatSemaforON 
+			if estatSemaforVermell == estatSemaforOFF:
+				estatSemaforVermell = estatSemaforON
+				gpio.output(pinSemRojo, False)
 		else:
 			if estatSemaforVermell == estatSemaforON:#lo apagamos
 				gpio.output(pinSemRojo, True)
