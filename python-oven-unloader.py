@@ -235,6 +235,7 @@ def sendPulse(pulses, timeBaix, timeAlt):
 	global estatSemaforTronja
 	global estatElevador
 	global estatMotorIN
+	global stopMovement
 	gpio.output(pinSemNaran, False) #se mueve el rack 
 	estatSemaforTronja = estatSemaforON
 
