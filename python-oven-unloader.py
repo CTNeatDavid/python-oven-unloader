@@ -670,6 +670,9 @@ def on_message(client, userdata, message):
 		elif message.topic == 'CTForn/LevelPlatform':
 			print('Request to level the platform')
 			levelPlatformRequest = True
+		elif message.topic == 'CTForn/Shutdown':
+			print('Request to shutdown the system')
+			os.system("sudo shutdown -h now")
 		return
 	except Exception as e:
 	    print('Exception message: ' + str(e))       
@@ -767,6 +770,7 @@ if __name__ == '__main__':
 	client.subscribe('CTForn/UpdateFromMySQL')
 	client.subscribe('CTForn/currentMode')
 	client.subscribe('CTForn/stopMovement')
+	client.subscribe('CTForn/Shutdown') #apagar hacer
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
