@@ -377,14 +377,14 @@ def moveToUpperHome():
 	print('Going up')
 	changeDirection(Adalt)
 	while estatElevador != estatElevadorAdalt and stopMovement == False and estatElevador != estatElevadorEnError:		
-		sendPulse(pulsosPerRev,velocitatOFF,velocitatON)
+		sendPulse(pulsosLastPosition + (numeroDePosicion-currentPosition)*pulsosPerPis+pulsosPerPis,velocitatOFF,velocitatON)
 	movementStopped()
 
 def moveToLowerHome():
 	print('Going down')
 	changeDirection(Abaix)
 	while estatElevador != estatElevadorAbaix and stopMovement == False and estatElevador != estatElevadorEnError:		
-		sendPulse(pulsosPerRev,velocitatOFF,velocitatON)
+		sendPulse(pulsosLastPosition + (numeroDePosicion-currentPosition)*pulsosPerPis+pulsosPerPis,velocitatOFF,velocitatON)
 	movementStopped()
 
 def moveOnePosition():
