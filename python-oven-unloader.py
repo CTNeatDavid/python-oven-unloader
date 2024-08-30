@@ -37,7 +37,7 @@ sensorINPin2				= 20#
 rackINPin					= 19#
 motorInPin					= 13#
 SMEMAPin					= 2#
-ventiladorPin				= 7
+ventiladorPin				= 26#
 pinSemVerde					= 17#
 pinSemRojo					= 12#
 pinSemNaran					= 7#
@@ -539,17 +539,17 @@ def on_message(client, userdata, message):
 	global stopMovement
 	global levelPlatformRequest
 	try:
-		message.payload = message.payload.decode("utf-8")
-		print( 'Message received: ' + message.payload + ' of the topic ' + message.topic)
-		if message.payload.find('$') == -1:
-			print('client name not found in command')
-			return
-		randomUIdClient = message.payload[message.payload.find('$')+1:]
-		message.payload = message.payload[:message.payload.find('$')]
-		print( 'Message from ' + randomUIdClient + ': ' + message.payload)
+		#message.payload = message.payload.decode("utf-8")
+		#print( 'Message received: ' + message.payload + ' of the topic ' + message.topic)
+		#if message.payload.find('$') == -1:
+		#	print('client name not found in command')
+		#	return
+		#randomUIdClient = message.payload[message.payload.find('$')+1:]
+		#message.payload = message.payload[:message.payload.find('$')]
+		print( 'Message from: ' + message.payload)
 		if message.topic == 'CTForn/ARE_YOU_HERE':
 			print('IM HERE!')
-			client.publish('CTForn/IM_HERE/' + randomUIdClient,'IM HERE')
+			client.publish('CTForn/IM_HERE','IM HERE')
 		elif message.topic == 'CTForn/SendPulses': #pulses%direction@speedON|speedOFF
 			numberOfPulses = 0
 			speedON = 900
@@ -557,7 +557,7 @@ def on_message(client, userdata, message):
 			direction = -1
 			if message.payload.find('%') == -1 or message.payload.find('@') == -1 or message.payload.find('|') == -1:
 				print('Parameters missing in message')
-				client.publish('CTForn/SendPulses/' + randomUIdClient,'ERR') 
+				client.publish('CTForn/SendPulses','ERR') 
 			else:
 				numberOfPulses = message.payload[:message.payload.find('%')]
 				direction = message.payload[message.payload.find('%')+1:message.payload.find('@')]
@@ -571,7 +571,7 @@ def on_message(client, userdata, message):
 				changeDirection(int(direction))
 				sendPulse(int(numberOfPulses),float(speedOFF),float(speedON))
 				movementStopped()
-				client.publish('CTForn/SendPulses/' + randomUIdClient,'DONE')
+				client.publish('CTForn/SendPulses','DONE')
 		elif message.topic == 'CTForn/TurnMotor': #Turns%direction@speedON|speedOFF
 			turns = 0
 			speedON = 900
@@ -579,12 +579,12 @@ def on_message(client, userdata, message):
 			direction = -1
 			if message.payload.find('%') == -1 or message.payload.find('@') == -1 or message.payload.find('|') == -1:
 				print('Parameters missing in message')
-				client.publish('CTForn/TurnMotor/' + randomUIdClient,'ERR') 
+				client.publish('CTForn/TurnMotor','ERR') 
 			else:
 				#turns = float(message.payload[:message.payload.find('%')])
 				#turns = 
 				if autoMode == True: #Ha d'estar activat el mode manual
-					client.publish('CTForn/TurnMotor/' + randomUIdClient,'ERR')
+					client.publish('CTForn/TurnMotor','ERR')
 					return
 				direction = int(message.payload[message.payload.find('%')+1:message.payload.find('@')])
 				speedON = message.payload[message.payload.find('@')+1:message.payload.find('|')]
@@ -595,10 +595,10 @@ def on_message(client, userdata, message):
 				print('SpeedON: ' + str(speedON))
 				print('SpeedOFF: ' + str(speedOFF))
 				if direction == Abaix and currentPosition == 0:
-					client.publish('CTForn/TurnMotor/' + randomUIdClient,'DONE')
+					client.publish('CTForn/TurnMotor','DONE')
 					return
 				elif direction == Adalt and currentPosition == numeroDePosicion-1:
-					client.publish('CTForn/TurnMotor/' + randomUIdClient,'DONE')
+					client.publish('CTForn/TurnMotor','DONE')
 					return
 				elif direction == Abaix:
 					currentPosition = currentPosition-1
@@ -618,32 +618,32 @@ def on_message(client, userdata, message):
 				sendPulse(round(pulsosPerPis),float(speedOFF),float(speedON))
 				movementStopped()
 				# ~ time.sleep(0.01)
-				client.publish('CTForn/TurnMotor/' + randomUIdClient,'DONE')
+				client.publish('CTForn/TurnMotor','DONE')
 		elif message.topic == 'CTForn/currentElevatorState':
 			print('The elevator is in: ' + str(estatElevador))
-			client.publish('CTForn/estatElevador/' + randomUIdClient,estatElevador)
+			client.publish('CTForn/estatElevador',estatElevador)
 		elif message.topic == 'CTForn/currentPlateState':
 			print('The plate is in: ' + str(estatPlaca))
-			client.publish('CTForn/estatPlate/' + randomUIdClient,estatPlaca)		
+			client.publish('CTForn/estatPlate',estatPlaca)		
 		elif message.topic == 'CTForn/currentRackState':
 			print('The rack is in: ' + str(estatRack))
-			client.publish('CTForn/estatRack/' + randomUIdClient,estatRack)
+			client.publish('CTForn/estatRack',estatRack)
 		elif message.topic == 'CTForn/currentMotorState':
 			print('The motor is : ' + str(estatMotorIN))
-			client.publish('CTForn/estatMotorIN/' + randomUIdClient,estatMotorIN)
+			client.publish('CTForn/estatMotorIN',estatMotorIN)
 		elif message.topic == 'CTForn/currentSMEMAState':
 			print('SMEMA is : ' + str(estatSMEMA))
-			client.publish('CTForn/estatSMEMA/' + randomUIdClient,estatSMEMA)
+			client.publish('CTForn/estatSMEMA',estatSMEMA)
 		elif message.topic == 'CTForn/currentFanState':
 			print('The fan is : ' + str(estatVentilador))
-			client.publish('CTForn/estatVentilador/' + randomUIdClient,estatVentilador)
+			client.publish('CTForn/estatVentilador',estatVentilador)
 		elif message.topic == 'CTForn/currentMode':
 			if autoMode == True:
 				print('The elevator is in auto')
-				client.publish('CTForn/estatMode/' + randomUIdClient,"1")
+				client.publish('CTForn/estatMode',"1")
 			else:
 				print('The elevator is in manual')
-				client.publish('CTForn/estatMode/' + randomUIdClient,"0")			
+				client.publish('CTForn/estatMode',"0")			
 		elif message.topic == 'CTForn/ResetAndGo':
 			print('Auto reset requested')
 			resetRequested = True
@@ -801,7 +801,7 @@ if __name__ == '__main__':
 			tFile = open('/sys/class/thermal/thermal_zone0/temp')
 			temp = float(tFile.read())
 			tempC = int(temp/1000)
-			client.publish('CTForn/CPUTemperature',str(tempC))
+			client.publish('CTForn/CPUTemperature/real',str(tempC))
 			print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' T: ' + str(tempC))
 			if tempC >= tempMax and estatVentilador == estatVentiladorOFF:
 				gpio.output(ventiladorPin, True)
@@ -853,6 +853,13 @@ if __name__ == '__main__':
 		if rackDetectatIN and (datetime.now() - horaRackDetectat).seconds >= tempsMinimRackDetectat:		
 			estatRack = estatRackIN
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- FI GESTIO SENSOR RACK	
+		
+		#warehouse (rack)
+		#record-vinyl (motor in)
+		#circle-arrow-up y circle-arrow-down
+		#link (SMEMA)
+		#microchip (estat placa)
+
 
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO MOVE ONE POSITION AUTO	
 		if needToMoveOnePosition and (datetime.now() - horaPlacaForaDeSensor).seconds >= tempsMotorEngegatDespres and autoMode == True and estatRack == estatRackIN:
