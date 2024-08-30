@@ -539,14 +539,14 @@ def on_message(client, userdata, message):
 	global stopMovement
 	global levelPlatformRequest
 	try:
-		#message.payload = message.payload.decode("utf-8")
-		#print( 'Message received: ' + message.payload + ' of the topic ' + message.topic)
+		message.payload = message.payload.decode("utf-8")
+		print( 'Message received: ' + message.payload + ' of the topic ' + message.topic)
 		#if message.payload.find('$') == -1:
 		#	print('client name not found in command')
 		#	return
 		#randomUIdClient = message.payload[message.payload.find('$')+1:]
 		#message.payload = message.payload[:message.payload.find('$')]
-		print( 'Message from: ' + message.payload)
+		#print( 'Message from: ' + message.payload)
 		if message.topic == 'CTForn/ARE_YOU_HERE':
 			print('IM HERE!')
 			client.publish('CTForn/IM_HERE','IM HERE')
