@@ -980,7 +980,7 @@ if __name__ == '__main__':
 				gpio.output(pinSemNaran, True)
 				estatSemaforTronja = estatSemaforOFF
 
-		if (estatSMEMA == estatSMEMA_OFF or (estatElevador == estatElevadorEnError and elevadorPerformingReset == False)):#//situaciones de semaforo en rojo
+		if ((estatSMEMA == estatSMEMA_OFF and autoMode == True) or (estatElevador == estatElevadorEnError and elevadorPerformingReset == False)):#//situaciones de semaforo en rojo
 			if estatSemaforVermell == estatSemaforOFF:
 				estatSemaforVermell = estatSemaforON
 				gpio.output(pinSemRojo, False)
