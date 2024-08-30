@@ -655,9 +655,11 @@ def on_message(client, userdata, message):
 			lowerResetRequested = True
 		elif message.topic == 'CTForn/AutoMode':
 			print('Switched to auto mode')
+			client.publish('CTForn/estatMode',"1")
 			autoMode = True
 		elif message.topic == 'CTForn/ManualMode':
 			print('Switched to manual mode')
+			client.publish('CTForn/estatMode',"0")	
 			autoMode = False
 		elif message.topic == 'CTForn/UpdateFromMySQL':
 			print('Updating from mySQL')
