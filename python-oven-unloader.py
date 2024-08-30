@@ -37,7 +37,7 @@ sensorINPin2				= 20#
 rackINPin					= 19#
 motorInPin					= 13#
 SMEMAPin					= 2#
-ventiladorPin				= 25#
+#ventiladorPin				= 25#
 pinSemVerde					= 17#
 pinSemRojo					= 12#
 pinSemNaran					= 7#
@@ -719,8 +719,8 @@ if __name__ == '__main__':
 	gpio.setup(SMEMAPin, gpio.OUT)
 	gpio.output(SMEMAPin, True)
 
-	gpio.setup(ventiladorPin, gpio.OUT)
-	gpio.output(ventiladorPin, False)
+	#gpio.setup(ventiladorPin, gpio.OUT)
+	#gpio.output(ventiladorPin, False)
 
 	gpio.setup(pinSemVerde, gpio.OUT)
 	gpio.output(pinSemVerde, True)
@@ -808,14 +808,14 @@ if __name__ == '__main__':
 			client.publish('CTForn/CPUTemperature/real',str(tempC))
 			print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' T: ' + str(tempC))
 			if tempC >= tempMax and estatVentilador == estatVentiladorOFF:
-				print('Ventilador engegat')
-				gpio.output(ventiladorPin, True)
+				#print('Ventilador engegat')
+				#gpio.output(ventiladorPin, True)
 				horaOnVentilador = datetime.now()
 				estatVentilador = estatVentiladorON
 				client.publish('CTForn/estatVentilador',estatVentilador)
 			elif tempC < tempMin and (datetime.now() - horaOnVentilador).seconds >= tempsMinimVentilador and estatVentilador == estatVentiladorON:
-				print('Ventilador apagat')
-				gpio.output(ventiladorPin, False)
+				#print('Ventilador apagat')
+				#gpio.output(ventiladorPin, False)
 				estatVentilador = estatVentiladorOFF
 				client.publish('CTForn/estatVentilador',estatVentilador)
 
