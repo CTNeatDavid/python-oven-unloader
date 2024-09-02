@@ -579,7 +579,7 @@ def on_message(client, userdata, message):
 			direction = -1
 			if message.payload.find('%') == -1 or message.payload.find('@') == -1 or message.payload.find('|') == -1:
 				print('Parameters missing in message')
-				client.publish('CTForn/TurnMotor','ERR') 
+				#client.publish('CTForn/TurnMotor','ERR') 
 			else:
 				#turns = float(message.payload[:message.payload.find('%')])
 				#turns = 
