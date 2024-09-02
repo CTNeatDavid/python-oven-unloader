@@ -584,7 +584,7 @@ def on_message(client, userdata, message):
 				#turns = float(message.payload[:message.payload.find('%')])
 				#turns = 
 				if autoMode == True: #Ha d'estar activat el mode manual
-					client.publish('CTForn/TurnMotor','ERR')
+					#client.publish('CTForn/TurnMotor','ERR')
 					return
 				direction = int(message.payload[message.payload.find('%')+1:message.payload.find('@')])
 				speedON = message.payload[message.payload.find('@')+1:message.payload.find('|')]
@@ -595,10 +595,10 @@ def on_message(client, userdata, message):
 				print('SpeedON: ' + str(speedON))
 				print('SpeedOFF: ' + str(speedOFF))
 				if direction == Abaix and currentPosition == 0:
-					client.publish('CTForn/TurnMotor','DONE')
+					#client.publish('CTForn/TurnMotor','DONE')
 					return
 				elif direction == Adalt and currentPosition == numeroDePosicion-1:
-					client.publish('CTForn/TurnMotor','DONE')
+					#client.publish('CTForn/TurnMotor','DONE')
 					return
 				elif direction == Abaix:
 					currentPosition = currentPosition-1
@@ -612,13 +612,13 @@ def on_message(client, userdata, message):
 				db.commit()
 				cur.close()
 				db.close ()
-				client.publish('CTForn/updateMySQL',estatPlaca)
+				#client.publish('CTForn/updateMySQL',estatPlaca)
 				print('Current position: ' + str(currentPosition))
 				changeDirection(direction)				
 				sendPulse(round(pulsosPerPis),float(speedOFF),float(speedON))
 				movementStopped()
 				# ~ time.sleep(0.01)
-				client.publish('CTForn/TurnMotor','DONE')
+				#client.publish('CTForn/TurnMotor','DONE')
 		elif message.topic == 'CTForn/currentElevatorState':
 			print('The elevator is in: ' + str(estatElevador))
 			client.publish('CTForn/estatElevador',estatElevador)
