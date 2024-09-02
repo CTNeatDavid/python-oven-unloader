@@ -973,7 +973,7 @@ if __name__ == '__main__':
 		
 		#//------------------------------------------------------------------------------------------------------------------------------------------------------------- GESTIO SEMAFOR
 
-		if (estatPlaca == estatPlacaEntrant or estatPlaca == estatPlacaDins or autoMode == False):#//situaciones de semaforo en narnaja 
+		if (estatPlaca == estatPlacaEntrant or estatPlaca == estatPlacaDins or autoMode == False or elevadorPerformingReset == True):#//situaciones de semaforo en narnaja 
 			if estatSemaforTronja == estatSemaforOFF:
 				estatSemaforTronja = estatSemaforON
 				gpio.output(pinSemNaran, False)
@@ -982,7 +982,7 @@ if __name__ == '__main__':
 				gpio.output(pinSemNaran, True)
 				estatSemaforTronja = estatSemaforOFF
 
-		if ((estatSMEMA == estatSMEMA_OFF and autoMode == True) or (estatElevador == estatElevadorEnError and elevadorPerformingReset == False)):#//situaciones de semaforo en rojo
+		if (((estatSMEMA == estatSMEMA_OFF and autoMode == True) or (estatElevador == estatElevadorEnError)) and elevadorPerformingReset == False):#//situaciones de semaforo en rojo
 			if estatSemaforVermell == estatSemaforOFF:
 				estatSemaforVermell = estatSemaforON
 				gpio.output(pinSemRojo, False)
