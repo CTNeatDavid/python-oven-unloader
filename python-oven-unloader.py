@@ -920,6 +920,16 @@ if __name__ == '__main__':
 				print('Elevador adalt!')
 				estatElevador = estatElevadorAdalt
 
+			if estatSemaforVermell == estatSemaforON:#lo apagamos
+				gpio.output(pinSemRojo, True)
+				estatSemaforVermell = estatSemaforOFF
+			if estatPitoSemafor == estatPitoSemaforON:#lo apagamos
+				gpio.output(pionSemPito, True)
+				estatPitoSemafor = estatPitoSemaforOFF
+			if estatSemaforTronja == estatSemaforOFF: #lo encendemos
+				estatSemaforTronja = estatSemaforON
+				gpio.output(pinSemNaran, False)
+
 			deleteAlarm()
 
 			if resetRequested:
