@@ -10,7 +10,7 @@ import socket
 import threading
 
 Connected 					= False
-broker_address 				= '192.168.1.100'
+broker_address 				= '192.168.2.218'
 port 						= 1883
 mqttPass					= 'FGGaLHjaPygGLVBmNt4qcN4aRqyYkz'
 mqttUser					= 'CTPROD'
